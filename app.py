@@ -10,13 +10,10 @@ collection = [
 	{'id': 4, 'type': 'expeneses', 'category': 'Fueling', 'amount': 7000, 'date': '2023-05-08', 'log_date': '2023-07-14 17:34:19.435000'}
 ]
 
-@app.route('/capture/expenses', methods=['POST'])
-def capture_expenses():
-	"""Api endpoint to capture expenses
-	"""
-	category = request.form.get('category')
-	amount = request.form.get('amount')
-	date = request.form.get('date')
+def validate_capturing(form, capture_type):
+	category = form.get('category')
+	amount = form.get('amount')
+	date = form.get('date')
 
 	if not category or not amount or not date:
 		return 'Bad payload: Missing required value', 400
@@ -31,51 +28,31 @@ def capture_expenses():
 		'category': category,
 		'amount': amount,
 		'date': date,
-		'type': 'expenses',
+		'type': capture_type,
 		'log_date': datetime.now()
 	}
 	collection.append(payload)
 
 	response = {
 		'data': None,
-		'message': 'Expense recorded',
+		'message': f"{capture_type.title()} recorded",
 		'status': True
 	}
-	return jsonify(response), 201
+	return jsonify(response)
+
+
+@app.route('/capture/expenses', methods=['POST'])
+def capture_expenses():
+	"""Api endpoint to capture expenses
+	"""
+	return validate_capturing(request.form, 'expenses')
 
 
 @app.route('/capture/revenue', methods=['POST'])
 def capture_revenue():
 	"""Api endpoint to capture revenue
 	"""
-	category = request.form.get('category')
-	amount = request.form.get('amount')
-	date = request.form.get('date')
-
-	if not category or not amount or not date:
-		return 'Bad payload: Missing required value', 400
-
-	try:
-		datetime.strptime(date, '%Y-%m-%d')
-	except:
-		return 'Bad payload: Invalid date format', 400
-
-	payload = {
-		'id': len(collection) + 1,
-		'category': category,
-		'amount': amount,
-		'date': date,
-		'type': 'revenue',
-		'log_date': datetime.now()
-	}
-	collection.append(payload)
-
-	response = {
-		'data': None,
-		'message': 'Revenue recorded',
-		'status': True
-	}
-	return jsonify(response), 201
+	return validate_capturing(request.form, 'revenue')
 
 
 @app.route('/')
