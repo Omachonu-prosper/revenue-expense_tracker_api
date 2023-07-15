@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, send_file
 from datetime import datetime
 from openpyxl import Workbook
 import tempfile
-import os
 
 app = Flask(__name__)
 
