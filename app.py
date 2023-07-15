@@ -44,6 +44,40 @@ def capture_expenses():
 	return jsonify(response), 201
 
 
+@app.route('/capture/revenue', methods=['POST'])
+def capture_revenue():
+	"""Api endpoint to capture revenue
+	"""
+	category = request.form.get('category')
+	amount = request.form.get('amount')
+	date = request.form.get('date')
+
+	if not category or not amount or not date:
+		return 'Bad payload: Missing required value', 400
+
+	try:
+		datetime.strptime(date, '%Y-%m-%d')
+	except:
+		return 'Bad payload: Invalid date format', 400
+
+	payload = {
+		'id': len(collection) + 1,
+		'category': category,
+		'amount': amount,
+		'date': date,
+		'type': 'revenue',
+		'log_date': datetime.now()
+	}
+	collection.append(payload)
+
+	response = {
+		'data': None,
+		'message': 'Revenue recorded',
+		'status': True
+	}
+	return jsonify(response), 201
+
+
 @app.route('/')
 def home():
 	return jsonify(collection)
