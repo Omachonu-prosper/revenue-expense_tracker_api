@@ -77,7 +77,12 @@ def view_report(capture_type):
 			if start_date <= obj_date and end_date >= obj_date :
 				matched_reports.append(obj)
 
-	return jsonify(matched_reports)
+	response = {
+		'data': matched_reports,
+		'message': 'Data retrieved',
+		'status': True
+	}
+	return jsonify(response)
 
 
 @app.route('/')
