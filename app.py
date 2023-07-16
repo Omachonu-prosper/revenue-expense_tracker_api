@@ -51,6 +51,32 @@ def validate_capturing(form, capture_type):
 	return jsonify(response), 201
 
 
+def validate_report(args, capture_type):
+	response = {
+		'is-error': False
+	}
+	if capture_type.lower() not in ['expenses', 'revenue']:
+		response['is-error'] = True
+		response['error-message'] = 'Not Found'
+		response['status-code'] = 400
+		return response
+
+	start_date = args.get('start-date')
+	end_date = args.get('end-date')
+	try:
+		start_date = datetime.strptime(start_date, '%Y-%m-%d')
+		end_date = datetime.strptime(end_date, '%Y-%m-%d')
+	except:
+		response['is-error'] = True
+		response['error-message'] = 'Bad payload: Invalid start_date or end_date format'
+		response['status-code'] = 400
+		return response
+
+	response['start-date'] = start_date
+	response['end-date'] = end_date
+	return response
+
+
 @app.route('/capture/expenses', methods=['POST'])
 def capture_expenses():
 	"""Api endpoint to capture expenses
@@ -69,17 +95,12 @@ def capture_revenue():
 def view_report(capture_type):
 	"""Api endpoint to view report
 	"""
-	if capture_type.lower() not in ['expenses', 'revenue']:
-		return 'Not Found', 404
+	validate = validate_report(request.args, capture_type)
+	if validate['is-error']:
+		return validate['error-message'], validate['status-code']
 
-	start_date = request.args.get('start_date')
-	end_date = request.args.get('end_date')
-	try:
-		start_date = datetime.strptime(start_date, '%Y-%m-%d')
-		end_date = datetime.strptime(end_date, '%Y-%m-%d')
-	except:
-		return 'Bad payload: Invalid start_date or end_date format', 400
-
+	start_date = validate['start-date']
+	end_date = validate['end-date']
 	matched_reports = []
 	for obj in collection:
 		if obj['type'] == capture_type.lower():
@@ -94,21 +115,18 @@ def view_report(capture_type):
 	}
 	return jsonify(response)
 
+
 @app.route('/download/<string:capture_type>/report')
 def download_report(capture_type):
 	"""Api endpoint to download report
 	"""
-	if capture_type.lower() not in ['expenses', 'revenue']:
-		return 'Not Found', 404
+	validate = validate_report(request.args, capture_type)
+	if validate['is-error']:
+		return validate['error-message'], validate['status-code']
 
-	start_date = request.args.get('start_date')
-	end_date = request.args.get('end_date')
-	try:
-		start_date = datetime.strptime(start_date, '%Y-%m-%d')
-		end_date = datetime.strptime(end_date, '%Y-%m-%d')
-	except:
-		return 'Bad payload: Invalid start_date or end_date format', 400
-
+	start_date = validate['start-date']
+	end_date = validate['end-date']
+	
 	# Create an excel file to write to
 	wb = Workbook()
 	sheet = wb.active
