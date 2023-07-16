@@ -29,6 +29,11 @@ def validate_capturing(form, capture_type):
 	except:
 		return 'Bad payload: Invalid date format', 400
 
+	try:
+		amount = int(amount)
+	except:
+		return 'Bad payload: Amount must be an integer', 400
+
 	payload = {
 		'category': category,
 		'amount': amount,
