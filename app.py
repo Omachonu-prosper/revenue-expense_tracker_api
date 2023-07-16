@@ -1,9 +1,13 @@
 from flask import Flask, request, jsonify, send_file
+from flask_pymongo import PyMongo
+from bson import json_util
 from datetime import datetime
 from openpyxl import Workbook
 import tempfile
 
 app = Flask(__name__)
+app.config['MONGO_URI'] = 'mongodb://127.0.0.1:27017/re_api'
+mongo = PyMongo(app)
 
 collection = [
 	{'id': 1, 'type': 'revenue', 'category': 'Building renovation', 'amount': 300000, 'date': '2023-04-23', 'log_date': '2023-07-14 17:31:45.655461'},
@@ -26,14 +30,13 @@ def validate_capturing(form, capture_type):
 		return 'Bad payload: Invalid date format', 400
 
 	payload = {
-		'id': len(collection) + 1,
 		'category': category,
 		'amount': amount,
 		'date': date,
 		'type': capture_type,
 		'log_date': datetime.now()
 	}
-	collection.append(payload)
+	mongo.db.data.insert_one(payload)
 
 	response = {
 		'data': None,
@@ -133,7 +136,8 @@ def download_report(capture_type):
 
 @app.route('/')
 def home():
-	return jsonify(collection)
+	return jsonify(list(mongo.db.data.find({}, {'_id': 0})))
+
 
 if __name__ == '__main__':
 	app.run(debug=True)
