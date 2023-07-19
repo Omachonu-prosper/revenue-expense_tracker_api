@@ -25,7 +25,7 @@ def validate_capturing(form, capture_type):
 		return 'Bad payload: Missing required value', 400
 
 	try:
-		datetime.strptime(date, '%Y-%m-%d')
+		date = datetime.strptime(date, '%Y-%m-%d')
 	except:
 		return 'Bad payload: Invalid date format', 400
 
@@ -101,15 +101,19 @@ def view_report(capture_type):
 
 	start_date = validate['start-date']
 	end_date = validate['end-date']
-	matched_reports = []
-	for obj in collection:
-		if obj['type'] == capture_type.lower():
-			obj_date = datetime.strptime(obj['date'], '%Y-%m-%d')
-			if start_date <= obj_date and end_date >= obj_date :
-				matched_reports.append(obj)
+	matched_reports = mongo.db.data.find(
+		{
+			'date': {
+				'$gte': start_date,
+				'$lte': end_date
+			},
+			'type': capture_type
+		},
+		{'_id': 0}
+	)
 
 	response = {
-		'data': matched_reports,
+		'data': list(matched_reports),
 		'message': 'Data retrieved',
 		'status': True
 	}
@@ -126,6 +130,16 @@ def download_report(capture_type):
 
 	start_date = validate['start-date']
 	end_date = validate['end-date']
+	matched_reports = mongo.db.data.find(
+		{
+			'date': {
+				'$gte': start_date,
+				'$lte': end_date
+			},
+			'type': capture_type
+		},
+		{'_id': 0}
+	)
 	
 	# Create an excel file to write to
 	wb = Workbook()
@@ -134,19 +148,16 @@ def download_report(capture_type):
 	s_n = 1
 	sheet.append(heading)
 
-	for obj in collection:
-		if obj['type'] == capture_type.lower():
-			obj_date = datetime.strptime(obj['date'], '%Y-%m-%d')
-			if start_date <= obj_date and end_date >= obj_date :
-				row = [
-					s_n,
-					obj['category'],
-					obj['amount'],
-					obj['date'],
-					obj['type']
-				]
-				sheet.append(row)
-				s_n += 1
+	for obj in matched_reports:
+		row = [
+			s_n,
+			obj['category'],
+			obj['amount'],
+			str(obj['date']),
+			obj['type']
+		]
+		sheet.append(row)
+		s_n += 1
 
 	# Save excel file temporarily on the server
 	with tempfile.NamedTemporaryFile(delete=False) as tmp:
