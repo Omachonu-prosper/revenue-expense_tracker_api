@@ -70,6 +70,20 @@ def validate_report(args, capture_type):
 	return response
 
 
+def fetch_report(start_date, end_date, capture_type):
+	matched_reports = mongo.db.data.find(
+		{
+			'date': {
+				'$gte': start_date,
+				'$lte': end_date
+			},
+			'type': capture_type
+		},
+		{'_id': 0}
+	)
+	return matched_reports
+
+
 @app.route('/capture/expenses', methods=['POST'])
 def capture_expenses():
 	"""Api endpoint to capture expenses
@@ -94,16 +108,7 @@ def view_report(capture_type):
 
 	start_date = validate['start-date']
 	end_date = validate['end-date']
-	matched_reports = mongo.db.data.find(
-		{
-			'date': {
-				'$gte': start_date,
-				'$lte': end_date
-			},
-			'type': capture_type
-		},
-		{'_id': 0}
-	)
+	matched_reports = fetch_report(start_date, end_date, capture_type)
 
 	response = {
 		'data': list(matched_reports),
@@ -123,16 +128,7 @@ def download_report(capture_type):
 
 	start_date = validate['start-date']
 	end_date = validate['end-date']
-	matched_reports = mongo.db.data.find(
-		{
-			'date': {
-				'$gte': start_date,
-				'$lte': end_date
-			},
-			'type': capture_type
-		},
-		{'_id': 0}
-	)
+	matched_reports = fetch_report(start_date, end_date, capture_type)
 	
 	# Create an excel file to write to
 	wb = Workbook()
