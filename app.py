@@ -9,13 +9,6 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://127.0.0.1:27017/re_api'
 mongo = PyMongo(app)
 
-collection = [
-	{'id': 1, 'type': 'revenue', 'category': 'Building renovation', 'amount': 300000, 'date': '2023-04-23', 'log_date': '2023-07-14 17:31:45.655461'},
-	{'id': 2, 'type': 'expenses', 'category': 'Transportation', 'amount': 10000, 'date': '2023-05-06', 'log_date': '2023-07-14 17:34:34.234008'},
-	{'id': 3, 'type': 'revenue', 'category': 'Offerings', 'amount': 56000, 'date': '2023-05-07', 'log_date': '2023-07-14 17:34:03.464338'},
-	{'id': 4, 'type': 'expenses', 'category': 'Fueling', 'amount': 7000, 'date': '2023-05-08', 'log_date': '2023-07-14 17:34:19.435000'}
-]
-
 def validate_capturing(form, capture_type):
 	category = form.get('category')
 	amount = form.get('amount')
