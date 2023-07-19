@@ -83,6 +83,30 @@ def fetch_report(start_date, end_date, capture_type):
 	)
 	return matched_reports
 
+def save_to_excel(matched_reports):
+	# Create an excel file to write to
+	wb = Workbook()
+	sheet = wb.active
+	heading = ['S/N', 'Item', 'Amount', 'Date', 'Type']
+	s_n = 1
+	sheet.append(heading)
+
+	for obj in matched_reports:
+		row = [
+			s_n,
+			obj['category'],
+			obj['amount'],
+			str(obj['date']),
+			obj['type']
+		]
+		sheet.append(row)
+		s_n += 1
+
+	# Save excel file temporarily on the server
+	with tempfile.NamedTemporaryFile(delete=False) as tmp:
+		filename = tmp.name
+		wb.save(filename)
+	return filename
 
 @app.route('/capture/expenses', methods=['POST'])
 def capture_expenses():
@@ -129,30 +153,8 @@ def download_report(capture_type):
 	start_date = validate['start-date']
 	end_date = validate['end-date']
 	matched_reports = fetch_report(start_date, end_date, capture_type)
+	filename = save_to_excel(matched_reports)
 	
-	# Create an excel file to write to
-	wb = Workbook()
-	sheet = wb.active
-	heading = ['S/N', 'Item', 'Amount', 'Date', 'Type']
-	s_n = 1
-	sheet.append(heading)
-
-	for obj in matched_reports:
-		row = [
-			s_n,
-			obj['category'],
-			obj['amount'],
-			str(obj['date']),
-			obj['type']
-		]
-		sheet.append(row)
-		s_n += 1
-
-	# Save excel file temporarily on the server
-	with tempfile.NamedTemporaryFile(delete=False) as tmp:
-		filename = tmp.name
-		wb.save(filename)
-
 	# Return file to user for downloading
 	return send_file(filename, as_attachment=True, download_name=f"{capture_type}_data.xlsx")
 
