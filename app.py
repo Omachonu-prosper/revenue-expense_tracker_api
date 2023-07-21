@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from pymongo.mongo_client import MongoClient
 from datetime import datetime
+from dotenv import load_dotenv
 import os
 
 from validate_capturing import validate_capturing
@@ -10,10 +11,27 @@ from fetch_report import fetch_report
 
 
 app = Flask(__name__)
-uri = "mongodb+srv://re_api_admin:re_api_password@re-api-cluster1.fvlpwol.mongodb.net/?retryWrites=true&w=majority"
+
+# Load all environment variables stored in .env files
+load_dotenv()
+
+# If we are working in a production environment (deployed state)
+# the database to be used will be the mongodb atlas database
+# else the local mongodb instance will be used
+app_status = os.environ.get('APP_STATUS')
+if app_status == 'production':
+	db_username = os.environ['DATABASE_USER']
+	db_passwd = os.environ['DATABASE_PASSWORD']
+	db_url = os.environ['DATABASE_URL']
+	uri = f"mongodb+srv://{db_username}:{db_passwd}@{db_url}"
+else:
+	uri = "mongodb://127.0.0.1:27017"
+
+
 client = MongoClient(uri)
 db = client['re_api']
 data = db['data']
+
 
 @app.route('/capture/expenses', methods=['POST'])
 def capture_expenses():
