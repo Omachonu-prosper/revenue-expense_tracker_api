@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_file
-from flask_pymongo import PyMongo
+from pymongo.mongo_client import MongoClient
 from datetime import datetime
 
 from validate_capturing import validate_capturing
@@ -9,9 +9,10 @@ from fetch_report import fetch_report
 
 
 app = Flask(__name__)
-app.config['MONGO_URI'] = 'mongodb://127.0.0.1:27017/re_api'
-mongo = PyMongo(app)
-
+uri = "mongodb+srv://re_api_admin:re_api_password@re-api-cluster1.fvlpwol.mongodb.net/?retryWrites=true&w=majority"
+client = MongoClient(uri)
+db = client['re_api']
+data = db['data']
 
 @app.route('/capture/expenses', methods=['POST'])
 def capture_expenses():
@@ -31,7 +32,7 @@ def capture_expenses():
 	payload['date'] = date
 	payload['type'] = 'expenses'
 	payload['log_date'] = datetime.now()
-	mongo.db.data.insert_one(payload)
+	data.insert_one(payload)
 
 	response = {
 		'data': None,
@@ -59,7 +60,7 @@ def capture_revenue():
 	payload['date'] = date
 	payload['type'] = 'revenue'
 	payload['log_date'] = datetime.now()
-	mongo.db.data.insert_one(payload)
+	data.insert_one(payload)
 
 	response = {
 		'data': None,
@@ -79,7 +80,7 @@ def view_report(capture_type):
 
 	start_date = validate['start-date']
 	end_date = validate['end-date']
-	matched_reports = fetch_report(mongo, start_date, end_date, capture_type)
+	matched_reports = fetch_report(data, start_date, end_date, capture_type)
 
 	response = {
 		'data': list(matched_reports),
@@ -99,7 +100,7 @@ def download_report(capture_type):
 
 	start_date = validate['start-date']
 	end_date = validate['end-date']
-	matched_reports = fetch_report(mongo, start_date, end_date, capture_type)
+	matched_reports = fetch_report(data, start_date, end_date, capture_type)
 	filename = save_to_excel(matched_reports)
 	
 	# Return file to user for downloading
@@ -108,7 +109,7 @@ def download_report(capture_type):
 
 @app.route('/')
 def home():
-	return jsonify(list(mongo.db.data.find({}, {'_id': 0})))
+	return jsonify(list(data.find({}, {'_id': 0})))
 
 
 if __name__ == '__main__':

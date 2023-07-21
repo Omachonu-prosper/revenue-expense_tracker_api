@@ -1,5 +1,5 @@
-def fetch_report(mongo, start_date, end_date, capture_type):
-	matched_reports = mongo.db.data.find(
+def fetch_report(collection, start_date, end_date, capture_type):
+	matched_reports = collection.db.data.find(
 		{
 			'date': {
 				'$gte': start_date,
