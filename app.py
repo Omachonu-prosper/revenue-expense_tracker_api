@@ -145,11 +145,6 @@ def download_report(capture_type):
 	return send_file(filename, as_attachment=True, download_name=f"{capture_type}_data.xlsx")
 
 
-@app.route('/')
-def home():
-	return jsonify(list(data.find({}, {'_id': 0})))
-
-
 if __name__ == '__main__':
 	if os.environ.get('APP_STATUS') == 'production':
 		app.run()
