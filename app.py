@@ -45,12 +45,13 @@ def capture_expenses():
 	if validate['error']:
 		return validate['error-message'], validate['error-code']
 
-	payload = {}
-	payload['category'] = category
-	payload['amount'] = amount
-	payload['date'] = date
-	payload['type'] = 'expenses'
-	payload['log_date'] = datetime.now()
+	payload = {
+		'category': category,
+		'amount': amount,
+		'date': date,
+		'type': 'expenses',
+		'log_date': datetime.now()
+	}
 	data.insert_one(payload)
 
 	response = {
@@ -73,12 +74,13 @@ def capture_revenue():
 	if validate['error']:
 		return validate['error-message'], validate['error-code']
 
-	payload = {}
-	payload['category'] = category
-	payload['amount'] = amount
-	payload['date'] = date
-	payload['type'] = 'revenue'
-	payload['log_date'] = datetime.now()
+	payload = {
+		'category': category,
+		'amount': amount,
+		'date': date,
+		'type': 'revenue',
+		'log_date': datetime.now()
+	}
 	data.insert_one(payload)
 
 	response = {
