@@ -4,11 +4,11 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 
-from validate_capturing import validate_capturing
-from save_to_excel import save_to_excel
-from validate_report import validate_report
-from fetch_report import fetch_report
-from auth import api_key_auth
+from controllers.validate_capturing import validate_capturing
+from controllers.save_to_excel import save_to_excel
+from controllers.validate_report import validate_report
+from controllers.fetch_report import fetch_report
+from controllers.auth import api_key_auth
 
 
 app = Flask(__name__)
