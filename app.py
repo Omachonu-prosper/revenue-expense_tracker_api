@@ -4,10 +4,11 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 
-from validate_capturing import validate_capturing
-from save_to_excel import save_to_excel
-from validate_report import validate_report
-from fetch_report import fetch_report
+from controllers.validate_capturing import validate_capturing
+from controllers.save_to_excel import save_to_excel
+from controllers.validate_report import validate_report
+from controllers.fetch_report import fetch_report
+from controllers.auth import api_key_auth
 
 
 app = Flask(__name__)
@@ -37,6 +38,10 @@ data = db['data']
 def capture_expenses():
 	"""Api endpoint to capture expenses
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+
 	category = request.form.get('category')
 	amount = request.form.get('amount')
 	date = request.form.get('date')
@@ -45,12 +50,13 @@ def capture_expenses():
 	if validate['error']:
 		return validate['error-message'], validate['error-code']
 
-	payload = {}
-	payload['category'] = category
-	payload['amount'] = amount
-	payload['date'] = date
-	payload['type'] = 'expenses'
-	payload['log_date'] = datetime.now()
+	payload = {
+		'category': category,
+		'amount': amount,
+		'date': datetime.strptime(date, '%Y-%m-%d'),
+		'type': 'expenses',
+		'log_date': datetime.now()
+	}
 	data.insert_one(payload)
 
 	response = {
@@ -65,6 +71,10 @@ def capture_expenses():
 def capture_revenue():
 	"""Api endpoint to capture revenue
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+
 	category = request.form.get('category')
 	amount = request.form.get('amount')
 	date = request.form.get('date')
@@ -73,12 +83,13 @@ def capture_revenue():
 	if validate['error']:
 		return validate['error-message'], validate['error-code']
 
-	payload = {}
-	payload['category'] = category
-	payload['amount'] = amount
-	payload['date'] = date
-	payload['type'] = 'revenue'
-	payload['log_date'] = datetime.now()
+	payload = {
+		'category': category,
+		'amount': amount,
+		'date': datetime.strptime(date, '%Y-%m-%d'),
+		'type': 'revenue',
+		'log_date': datetime.now()
+	}
 	data.insert_one(payload)
 
 	response = {
@@ -93,6 +104,10 @@ def capture_revenue():
 def view_report(capture_type):
 	"""Api endpoint to view report
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+
 	validate = validate_report(request.args, capture_type)
 	if validate['is-error']:
 		return validate['error-message'], validate['status-code']
@@ -113,6 +128,10 @@ def view_report(capture_type):
 def download_report(capture_type):
 	"""Api endpoint to download report
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+	
 	validate = validate_report(request.args, capture_type)
 	if validate['is-error']:
 		return validate['error-message'], validate['status-code']
@@ -132,4 +151,7 @@ def home():
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	if os.environ.get('APP_STATUS') == 'production':
+		app.run()
+	else:
+		app.run(debug=True)
