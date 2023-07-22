@@ -134,4 +134,7 @@ def home():
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	if os.environ.get('APP_STATUS') == 'production':
+		app.run()
+	else:
+		app.run(debug=True)
