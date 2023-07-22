@@ -53,7 +53,7 @@ def capture_expenses():
 	payload = {
 		'category': category,
 		'amount': amount,
-		'date': date,
+		'date': datetime.strptime(date, '%Y-%m-%d'),
 		'type': 'expenses',
 		'log_date': datetime.now()
 	}
@@ -86,7 +86,7 @@ def capture_revenue():
 	payload = {
 		'category': category,
 		'amount': amount,
-		'date': date,
+		'date': datetime.strptime(date, '%Y-%m-%d'),
 		'type': 'revenue',
 		'log_date': datetime.now()
 	}
