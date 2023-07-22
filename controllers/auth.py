@@ -11,12 +11,15 @@ def api_key_auth(client_key):
 		'message': 'Unauthorized access to endpoint'
 	}
 
-	if client_key:
+	try:
 		key = client_key.split(' ')[0]
 		value = client_key.split(' ')[1]
-		if key == 'ApiKey' and server_key == value:
-			auth['is_authorized'] = True
-			auth['status_code'] = 200
-			auth['message'] = 'Ok'
+	except:
+		return auth
+
+	if key == 'ApiKey' and server_key == value:
+		auth['is_authorized'] = True
+		auth['status_code'] = 200
+		auth['message'] = 'Ok'
 
 	return auth

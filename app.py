@@ -34,9 +34,9 @@ db = client['re_api']
 data = db['data']
 
 
-@app.route('/capture/expenses', methods=['POST'])
-def capture_expenses():
-	"""Api endpoint to capture expenses
+@app.route('/capture/<string:capture_type>', methods=['POST'])
+def capture_data(capture_type):
+	"""Api endpoint to capture expenses or revenue
 	"""
 	auth = api_key_auth(request.headers.get('Authorization'))
 	if not auth['is_authorized']:
@@ -46,55 +46,22 @@ def capture_expenses():
 	amount = request.form.get('amount')
 	date = request.form.get('date')
 
-	validate = validate_capturing(category, amount, date)
-	if validate['error']:
+	validate = validate_capturing(category, amount, date, capture_type)
+	if validate['is-error']:
 		return validate['error-message'], validate['error-code']
 
 	payload = {
 		'category': category,
-		'amount': amount,
+		'amount': int(amount),
 		'date': datetime.strptime(date, '%Y-%m-%d'),
-		'type': 'expenses',
+		'type': capture_type,
 		'log_date': datetime.now()
 	}
 	data.insert_one(payload)
 
 	response = {
 		'data': None,
-		'message': f"Expense recorded",
-		'status': True
-	}
-	return jsonify(response), 201
-
-
-@app.route('/capture/revenue', methods=['POST'])
-def capture_revenue():
-	"""Api endpoint to capture revenue
-	"""
-	auth = api_key_auth(request.headers.get('Authorization'))
-	if not auth['is_authorized']:
-		return auth['message'], auth['status_code']
-
-	category = request.form.get('category')
-	amount = request.form.get('amount')
-	date = request.form.get('date')
-
-	validate = validate_capturing(category, amount, date)
-	if validate['error']:
-		return validate['error-message'], validate['error-code']
-
-	payload = {
-		'category': category,
-		'amount': amount,
-		'date': datetime.strptime(date, '%Y-%m-%d'),
-		'type': 'revenue',
-		'log_date': datetime.now()
-	}
-	data.insert_one(payload)
-
-	response = {
-		'data': None,
-		'message': f"Revenue recorded",
+		'message': f"{capture_type.lower()} recorded",
 		'status': True
 	}
 	return jsonify(response), 201
