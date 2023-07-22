@@ -8,6 +8,7 @@ from validate_capturing import validate_capturing
 from save_to_excel import save_to_excel
 from validate_report import validate_report
 from fetch_report import fetch_report
+from auth import api_key_auth
 
 
 app = Flask(__name__)
@@ -37,6 +38,10 @@ data = db['data']
 def capture_expenses():
 	"""Api endpoint to capture expenses
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+
 	category = request.form.get('category')
 	amount = request.form.get('amount')
 	date = request.form.get('date')
@@ -66,6 +71,10 @@ def capture_expenses():
 def capture_revenue():
 	"""Api endpoint to capture revenue
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+
 	category = request.form.get('category')
 	amount = request.form.get('amount')
 	date = request.form.get('date')
@@ -95,6 +104,10 @@ def capture_revenue():
 def view_report(capture_type):
 	"""Api endpoint to view report
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+
 	validate = validate_report(request.args, capture_type)
 	if validate['is-error']:
 		return validate['error-message'], validate['status-code']
@@ -115,6 +128,10 @@ def view_report(capture_type):
 def download_report(capture_type):
 	"""Api endpoint to download report
 	"""
+	auth = api_key_auth(request.headers.get('Authorization'))
+	if not auth['is_authorized']:
+		return auth['message'], auth['status_code']
+	
 	validate = validate_report(request.args, capture_type)
 	if validate['is-error']:
 		return validate['error-message'], validate['status-code']
