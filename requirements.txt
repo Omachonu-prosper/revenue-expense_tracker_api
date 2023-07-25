@@ -4,7 +4,7 @@ colorama==0.4.6
 dnspython==2.3.0
 et-xmlfile==1.1.0
 Flask==2.2.4
-Flask-Cors==
+Flask-Cors
 gunicorn==21.2.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
