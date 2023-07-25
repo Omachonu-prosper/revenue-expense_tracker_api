@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 from pymongo.mongo_client import MongoClient
 from datetime import datetime
 from dotenv import load_dotenv
@@ -12,6 +13,9 @@ from controllers.auth import api_key_auth
 
 
 app = Flask(__name__)
+
+# Handle CORS errors
+CORS(app)
 
 # Load all environment variables stored in .env files
 load_dotenv()
