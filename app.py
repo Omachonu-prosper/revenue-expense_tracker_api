@@ -15,7 +15,7 @@ from controllers.auth import api_key_auth
 app = Flask(__name__)
 
 # Handle CORS errors
-# CORS(app)
+CORS(app)
 
 # Load all environment variables stored in .env files
 load_dotenv()
