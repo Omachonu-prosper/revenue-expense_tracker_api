@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from pymongo.mongo_client import MongoClient
 from datetime import datetime
 from dotenv import load_dotenv
@@ -39,6 +39,7 @@ data = db['data']
 
 
 @app.route('/capture/<string:capture_type>', methods=['POST'])
+@cross_origin()
 def capture_data(capture_type):
 	"""Api endpoint to capture expenses or revenue
 	"""
@@ -72,6 +73,7 @@ def capture_data(capture_type):
 
 
 @app.route('/view/<string:capture_type>/report')
+@cross_origin()
 def view_report(capture_type):
 	"""Api endpoint to view report
 	"""
@@ -96,6 +98,7 @@ def view_report(capture_type):
 
 
 @app.route('/download/<string:capture_type>/report')
+@cross_origin()
 def download_report(capture_type):
 	"""Api endpoint to download report
 	"""
