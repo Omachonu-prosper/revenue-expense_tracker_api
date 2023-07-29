@@ -46,9 +46,9 @@ def capture_data(capture_type):
 	if not auth['is_authorized']:
 		return auth['message'], auth['status_code']
 
-	category = request.form.get('category')
-	amount = request.form.get('amount')
-	date = request.form.get('date')
+	category = request.json.get('category')
+	amount = request.json.get('amount')
+	date = request.json.get('date')
 
 	validate = validate_capturing(category, amount, date, capture_type)
 	if validate['is-error']:
